@@ -1,18 +1,18 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+#import matplotlib.pyplot as plt
+#import seaborn as sns
 #%matplotlib inline since not using jupyter notebook
 import re
 import time
 from datetime import datetime
-import matplotlib.dates as mdates
-import matplotlib.ticker as ticker
+# import matplotlib.dates as mdates
+# import matplotlib.ticker as ticker
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import requests
 
-from bokeh.plotting import figure, show
+from bokeh.plotting import figure, show, gridplot
 # from bokeh.models import ColumnDataSource
 # from bokeh.transform import dodge
 # import math
@@ -35,7 +35,6 @@ register_matplotlib_converters()
     all imports of matplotlib and seaborn are giving error:
     Unable to init server: Could not connect: Connection refused
 Unable to init server: Could not connect: Connection refused
-
 (44065.py:82): Gdk-CRITICAL **: 20:01:25.111: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
 """
 def get_buoy_data(buoy):
@@ -100,7 +99,7 @@ def organize_raw_data(data):
 
 
 
-# call this function with return from make_buoy_dataframe(raw_data)
+# calling this function with return from make_buoy_dataframe(raw_data)
 """ ####################################################################################################"""
 def make_buoy_dataframe(raw_data):
     """
@@ -149,81 +148,10 @@ def make_buoy_dataframe(raw_data):
     return df
 """################################################################################################################"""
 
-
-
-
-"""################################################################################################################"""
-# def plot_wvht_vs_time(df, buoy_name):
-    # """  
-        # PLOT SWELL HEIGHT VS TIME FOR 5 DAY PERIOD
-        
-        # PARAMETERS: df - the dataframe passed to the function
-        
-        # RETURNS - A graph plotted in an webpage
-    # """
-    
-    # # try adding a quiver plot maybe???
-    # current_date = df['Date'].iloc[0]                               # most recent date in Noah webpage dataset
-    # five_days_ago = current_date - datetime.timedelta(days = 5)
-    # swht_vs_time = df[df['Date'] >= five_days_ago]
-    
-    # #using matplotlib
-    # # plt.title('Swell Height vs Time for Previous 5 Day Period')
-    # # plt.plot(swht_vs_time['Date'], swht_vs_time['WVHT'])
-    # # plt.show()
-
-
-    # # using bokeh make x_axis_type = 'datetime' otherwise x axis will be large scientific numbers
-    # p = figure(title = "Swell Height vs Time for 5 Day Period Buoy {}".format(buoy_name) , x_axis_label = 'Date', y_axis_label = 'Swell Height(meters)', x_axis_type = 'datetime')
-    # p.line(swht_vs_time['Date'], swht_vs_time['WVHT'], legend_label = 'buoy {}'.format(buoy_name), line_width = 2)
-    
-    # return show(p)
-
-"""################################################################################################################"""
-
-
-
-
-# # MAX SWELL HEIGHT SORTED DESCENDING VALUE
-# max_swht = swht_vs_time.sort_values('WVHT', axis = 0, ascending = False) # data frame sorted in descending order of max swell height
-# #print(max_swht)
-# # print(max_swht.iloc[:, 0])
-
-# # #highest swell height by time for 5 day period
-# # # p = figure(x_range = max_swht.iloc[:, 1], plot_width = 800, plot_height = 550, title = "Days Highest Swell Height", toolbar_location = None, tools = "")
-# # # p.vbar(x = max_swht.iloc[:, 1], top = max_swht.iloc[:, 3], width = 0.9)
-# # # p.xgrid.grid_line_color = None
-# # # p.y_range.start = 0
-# # # p.xaxis.major_label_orientation = math.pi/2
-# # # show(p)
-
-
-
-# # # 44077 doesnt have real time spectral wave data
-# # # buoy_list = [44065, 44008,44025, 44017, 44091]
-
-# # # for d in buoy_list:
-    # # # get_buoy_data(d)
-# # # #get_buoy_data(44065)  
-# # # #print(get_buoy_data(44065))
-
-
-"""##################################################### FUNCTION TESTS####################################################""" 
    
-#pd.set_option("display.max_rows", None, "display.max_columns", None)    #prints all rows and columns
-buoy_44065 = get_buoy_data(44065)
-organized_buoy_44065 = organize_raw_data(buoy_44065)
-df_44065 = make_buoy_dataframe(organized_buoy_44065)
-# plot_wvht_vs_time(df_44065)
-
-#buoy 44025
-buoy_44025 = get_buoy_data(44025)
-organized_buoy_44025 = organize_raw_data(buoy_44025)
-df_44025 = make_buoy_dataframe(organized_buoy_44025)
-# plot_wvht_vs_time(df_44025, '44025')
 
 
-#plot both buoys
+
 """#####################################################################################################################""" 
 def wvht_vs_time_x_days(df, x):
     """
@@ -252,31 +180,29 @@ def thin_data(df, x):
       return df.iloc[0::5, :]                  # start at 0th row select every 5th row of data, select all columns        
 
 """#####################################################################################################################"""
+#pd.set_option("display.max_rows", None, "display.max_columns", None)    #prints all rows and columns
+buoy_44065 = get_buoy_data(44065)
+organized_buoy_44065 = organize_raw_data(buoy_44065)
+df_44065 = make_buoy_dataframe(organized_buoy_44065)
+
+#buoy 44025
+buoy_44025 = get_buoy_data(44025)
+organized_buoy_44025 = organize_raw_data(buoy_44025)
+df_44025 = make_buoy_dataframe(organized_buoy_44025)
+
+
 #New wvht and datetime time subset dataframes for each respective buoy
 wvht_44065 = thin_data(wvht_vs_time_x_days(df_44065, 5), 5)
 wvht_44025 = thin_data(wvht_vs_time_x_days(df_44025, 5), 5)
 
 
 
-p = figure(title = "Swell Height vs Time for 5 Day Period", x_axis_label = 'Date', y_axis_label = 'Swell Height(meters)', x_axis_type = 'datetime')
-# p.line(wvht_44065['Date'], wvht_44065['WVHT'], legend_label = 'buoy 44065', line_color = 'blue', line_width = 2)
-# p.line(wvht_44025['Date'], wvht_44025['WVHT'], legend_label = 'buoy 44025', line_color = 'green', line_width = 2)
-
-# circles instead of line
-# p.circle(wvht_44065['Date'], wvht_44065['WVHT'], legend_label = 'buoy 44065', line_color = 'blue', size = 12)
-# p.circle(wvht_44025['Date'], wvht_44025['WVHT'], legend_label = 'buoy 44025', line_color = 'green', size = 12)
-
+p_44065 = figure(title = "NOAH Buoy 44065 Swell Height vs Time for 5 Day Period", x_axis_label = 'Date', y_axis_label = 'Swell Height(meters)', x_axis_type = 'datetime')
+p_44025 = figure(title = "NOAH Buoy 44025 Swell Height vs Time for 5 Day Period", x_axis_label = 'Date', y_axis_label = 'Swell Height(meters)', x_axis_type = 'datetime')
+p_44065.title.align = 'center'
+p_44025.title.align = 'center'
 #vertical bars
-p.vbar(x = wvht_44065['Date'], top = wvht_44065['WVHT'], legend_label = 'buoy 44065', width = 0.5, bottom = 0, color = 'red')
-p.vbar(x = wvht_44025['Date'], top = wvht_44025['WVHT'], legend_label = 'buoy 44025', width = 0.5, bottom = 0, color = 'green')
-show(p)
-
-
-
-# p = figure(title = "Swell Height vs Time for 5 Day Period", x_axis_label = 'Date', y_axis_label = 'Swell Height(meters)', x_axis_type = 'datetime')
-# p.line(swht_vs_time['Date'], swht_vs_time['WVHT'], legend_label = 'buoy 44065', line_width = 2)
-# p.line(sw)
-# show(p)
-
-
-
+p_44065.vbar(x = wvht_44065['Date'], top = wvht_44065['WVHT'], width = 0.5, bottom = 0, color = 'red')
+p_44025.vbar(x = wvht_44025['Date'], top = wvht_44025['WVHT'], width = 0.5, bottom = 0, color = 'green')
+g = gridplot([[p_44065, p_44025], [None, None]])
+show(g)
